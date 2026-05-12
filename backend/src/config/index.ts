@@ -4,13 +4,17 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// This file is at apps/backend/src/config/index.ts → backend dir is two levels up
+// dist/config/index.js → backend root is two levels up
 const backendDir = path.resolve(__dirname, '../..');
 const backendEnv = path.join(backendDir, '.env');
+// Also check backend/ subfolder relative to cwd (when run from repo root)
+const cwdBackendEnv = path.join(process.cwd(), 'backend', '.env');
 const cwdEnv = path.join(process.cwd(), '.env');
-// Load backend .env first; if missing, load cwd .env (e.g. when run from apps/backend)
+
 if (fs.existsSync(backendEnv)) {
   dotenv.config({ path: backendEnv, override: true });
+} else if (fs.existsSync(cwdBackendEnv)) {
+  dotenv.config({ path: cwdBackendEnv, override: true });
 } else {
   dotenv.config({ path: cwdEnv, override: false });
 }
