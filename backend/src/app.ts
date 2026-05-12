@@ -10,12 +10,12 @@ const app = express();
 
 app.use(
   cors({
-    origin: config.frontend.origins.length === 1
-      ? config.frontend.origins[0]
-      : (origin, cb) => {
-          if (origin && config.frontend.origins.includes(origin)) cb(null, origin);
-          else cb(null, false);
-        },
+    origin: (origin, cb) => {
+      // Allow server-to-server / curl (no origin header)
+      if (!origin) return cb(null, true);
+      if (config.frontend.origins.includes(origin)) return cb(null, origin);
+      cb(null, false);
+    },
     credentials: true,
   })
 );
