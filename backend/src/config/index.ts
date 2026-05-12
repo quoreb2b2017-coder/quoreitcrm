@@ -57,21 +57,16 @@ export const config = {
   },
 
   frontend: {
-    url: getEnvOptional('FRONTEND_URL', 'http://localhost:3000'),
-    /** Comma-separated list of allowed origins, or single origin. Defaults to 3000 and 3001 in dev. */
-    origins:
+    url: getEnvOptional('FRONTEND_URL', 'https://quoreitcrm.vercel.app'),
+    origins: (
       getEnvOptional(
         'CORS_ORIGINS',
-        'http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001'
-      )
-        ?.split(',')
-        .map((s) => s.trim())
-        .filter(Boolean) ?? [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'http://127.0.0.1:3000',
-        'http://127.0.0.1:3001',
-      ],
+        'https://quoreitcrm.vercel.app,http://localhost:3000,http://localhost:3001'
+      ) ?? 'https://quoreitcrm.vercel.app,http://localhost:3000,http://localhost:3001'
+    )
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
   },
 
   google: {
