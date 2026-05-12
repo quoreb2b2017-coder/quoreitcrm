@@ -10,6 +10,7 @@ import { api } from '@/services/api';
 import { Bell, ChevronDown, LogOut, UserCircle, Search } from 'lucide-react';
 import { resolvePageTitle } from '@/utils/pageTitles';
 import { useGlobalSearch } from '@/contexts/GlobalSearchContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 const roleLabels: Record<string, string> = {
   admin: 'Admin',
@@ -23,20 +24,13 @@ export function TopBar() {
   const { setOpen: openGlobalSearch } = useGlobalSearch();
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [seenByJob, setSeenByJob] = useState<Record<string, number>>({});
-  const [seenByJobHydrated, setSeenByJobHydrated] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
-  const STORAGE_KEY = `ats:seen-notifs:${user?.id ?? 'anon'}`;
 
   const canUseNotifications = hasRole('admin') || hasRole('recruiter');
+  const { unreadByJob, totalUnread, markJobRead, markAllRead } = useNotifications();
 
-  type NavbarChatJob = {
-    id: string;
-    title: string;
-    companyName: string;
-    lastMessageAt?: string | null;
-  };
+  type NavbarChatJob = { id: string; title: string; companyName: string; };
 
   const { data: notificationJobs = [] } = useQuery({
     queryKey: ['topbar', 'notifications', 'jobs'],
@@ -45,73 +39,12 @@ export function TopBar() {
       return (res.data?.data ?? []) as NavbarChatJob[];
     },
     enabled: canUseNotifications,
-    refetchInterval: 8000,
-    refetchOnWindowFocus: true,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (!user?.id) return;
-    setSeenByJobHydrated(false);
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Record<string, unknown>;
-        const coerced: Record<string, number> = {};
-        Object.entries(parsed).forEach(([k, v]) => {
-          const num = typeof v === 'number' ? v : Number(v);
-          if (!Number.isNaN(num)) coerced[k] = num;
-        });
-        setSeenByJob(coerced);
-      } else {
-        setSeenByJob({});
-      }
-    } catch {}
-    finally { setSeenByJobHydrated(true); }
-  }, [STORAGE_KEY, user?.id]);
-
-  useEffect(() => {
-    if (!user?.id || !seenByJobHydrated) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(seenByJob));
-  }, [STORAGE_KEY, seenByJob, user?.id, seenByJobHydrated]);
-
-  function getJobTs(job: NavbarChatJob): number {
-    if (!job.lastMessageAt) return 0;
-    const n = Number(job.lastMessageAt);
-    return Number.isFinite(n) ? n : new Date(job.lastMessageAt).getTime();
-  }
-
-  const unreadNotifications = notificationJobs.filter((job) => {
-    const ts = getJobTs(job);
-    if (!ts) return false;
-    const seen = seenByJob[job.id] ?? 0;
-    return ts > seen;
-  });
-
-  const unreadCount = unreadNotifications.length;
-
-  function markNotificationRead(jobId: string, ts: number) {
-    setSeenByJob((prev) => {
-      const updated = { ...prev, [jobId]: Math.max(prev[jobId] ?? 0, ts) };
-      return updated;
-    });
-  }
-
-  function markAllRead() {
-    const updated: Record<string, number> = { ...seenByJob };
-    unreadNotifications.forEach((n) => {
-      updated[n.id] = Math.max(updated[n.id] ?? 0, getJobTs(n));
-    });
-    setSeenByJob(updated);
-  }
-
-  function formatNotificationDate(ts: number) {
-    if (!ts) return '';
-    const diff = Date.now() - ts;
-    if (diff < 60000) return 'just now';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-    return `${Math.floor(diff / 86400000)}d ago`;
-  }
+  const unreadNotifications = notificationJobs.filter((job) => (unreadByJob[job.id] ?? 0) > 0);
+  const unreadCount = totalUnread;
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -225,13 +158,12 @@ export function TopBar() {
                     ) : (
                       <div className="space-y-2">
                         {unreadNotifications.slice(0, 10).map((n) => {
-                          const ts = getJobTs(n);
                           return (
                             <button
                               key={n.id}
                               type="button"
                               onClick={() => {
-                                markNotificationRead(n.id, ts);
+                                markJobRead(n.id);
                                 setNotifOpen(false);
                                 router.push(`/dashboard/messages?jobId=${encodeURIComponent(n.id)}`);
                               }}
@@ -245,7 +177,7 @@ export function TopBar() {
                                   <p className="truncate text-[13px] font-semibold text-[var(--foreground)]">{n.title}</p>
                                   <p className="truncate text-xs text-[var(--foreground-muted)]">{n.companyName || 'Team Chat'}</p>
                                   <p className="mt-1.5 text-[11px] text-[var(--foreground-subtle)] flex items-center justify-between">
-                                    <span>{formatNotificationDate(ts)}</span>
+                                    <span>{unreadByJob[n.id] ?? 0} new message{(unreadByJob[n.id] ?? 0) !== 1 ? 's' : ''}</span>
                                     <span className="text-blue-600 group-hover:underline">View →</span>
                                   </p>
                                 </div>
