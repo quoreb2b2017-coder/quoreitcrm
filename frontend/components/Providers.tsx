@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense, useState } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { GlobalSearchProvider } from '@/contexts/GlobalSearchContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
 import { NavigationRouteLoader } from '@/components/NavigationRouteLoader';
 
 import 'react-hot-toast';
@@ -24,12 +25,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <NotificationProvider>
         <GlobalSearchProvider>
           <Suspense fallback={null}>
             <NavigationRouteLoader />
           </Suspense>
           {children}
         </GlobalSearchProvider>
+        </NotificationProvider>
         <Toaster
           position="top-right"
           toastOptions={{
