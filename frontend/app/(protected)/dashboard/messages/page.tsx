@@ -24,6 +24,7 @@ import { RouteGuard } from '@/components/RouteGuard';
 import api from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAccessToken } from '@/lib/tokenStore';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 type ChatJob = {
   id: string;
@@ -76,9 +77,10 @@ export default function MessagesPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const { unreadByJob, markJobRead, socket: sharedSocket, socketConnected } = useNotifications();
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
-  const [socketConnected, setSocketConnected] = useState(false);
+  const [socketConnectedLocal, setSocketConnectedLocal] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pendingMessage, setPendingMessage] = useState('');
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
@@ -86,10 +88,12 @@ export default function MessagesPage() {
   const [isMobileView, setIsMobileView] = useState(false);
   const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(true);
   const [jobActivityMap, setJobActivityMap] = useState<Record<string, number>>({});
-  const [unreadByJob, setUnreadByJob] = useState<Record<string, number>>({});
-  const [knownLastMessageAtByJob, setKnownLastMessageAtByJob] = useState<Record<string, string>>({});
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const selectedJobIdRef = useRef<string | null>(null);
+
+  // Use shared socket from context, fall back to local if not ready
+  const activeSocket = sharedSocket ?? socketRef.current;
+  const isConnected = socketConnected || socketConnectedLocal;
 
   const { data: jobsRes, isLoading: loadingJobs } = useQuery({
     queryKey: ['messages', 'jobs'],
@@ -99,7 +103,7 @@ export default function MessagesPage() {
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
 
   const jobs = (jobsRes || []) as ChatJob[];
