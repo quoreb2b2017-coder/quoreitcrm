@@ -341,7 +341,7 @@ const FindJobsPage = () => {
             Join the future of technology and digital transformation
           </p>
 
-          <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+          <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
             <button className="inline-flex items-center px-12 py-6 bg-[#00d9a6] text-black font-semibold rounded-full hover:bg-[#c5f82a] transform hover:scale-105 transition-all duration-300 shadow-2xl text-xl">
               Get Started
               <svg className="w-6 h-6 ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

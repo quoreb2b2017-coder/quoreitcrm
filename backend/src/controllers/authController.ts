@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
 import { config } from '../config/index.js';
-import { cookieOptions, refreshTokenCookieName } from '../config/cookies.js';
+import { cookieOptions, clearCookieOptions, refreshTokenCookieName } from '../config/cookies.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/AppError.js';
 import { sendWelcomeEmail } from '../services/emailService.js';
@@ -143,7 +143,7 @@ export const refresh = asyncHandler(async (req: Request, res: Response): Promise
   try {
     decoded = jwt.verify(token, config.jwt.secret) as { userId: string; type: string };
   } catch {
-    res.clearCookie(refreshTokenCookieName, { path: '/', httpOnly: true, sameSite: 'lax' });
+    res.clearCookie(refreshTokenCookieName, clearCookieOptions);
     throw new AppError(401, 'Invalid or expired refresh token');
   }
 
@@ -153,11 +153,11 @@ export const refresh = asyncHandler(async (req: Request, res: Response): Promise
 
   const user = await User.findById(decoded.userId);
   if (!user) {
-    res.clearCookie(refreshTokenCookieName, { path: '/', httpOnly: true, sameSite: 'lax' });
+    res.clearCookie(refreshTokenCookieName, clearCookieOptions);
     throw new AppError(401, 'User no longer exists');
   }
   if (user.role !== 'admin' && user.role !== 'recruiter') {
-    res.clearCookie(refreshTokenCookieName, { path: '/', httpOnly: true, sameSite: 'lax' });
+    res.clearCookie(refreshTokenCookieName, clearCookieOptions);
     throw new AppError(403, 'This account role is no longer supported.');
   }
 
@@ -176,12 +176,7 @@ export const refresh = asyncHandler(async (req: Request, res: Response): Promise
 });
 
 export const logout = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
-  res.clearCookie(refreshTokenCookieName, {
-    path: '/',
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: config.nodeEnv === 'production',
-  });
+  res.clearCookie(refreshTokenCookieName, clearCookieOptions);
   res.json({ success: true, message: 'Logged out' });
 });
 

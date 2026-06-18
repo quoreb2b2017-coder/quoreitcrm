@@ -9,6 +9,7 @@ import {
   uploadIntroVideo,
   removeUpload,
   parseResume,
+  parseJobDescriptionPdf,
   signedUrl,
 } from '../controllers/uploadController.js';
 
@@ -33,6 +34,7 @@ router.use(authMiddleware);
 
 router.post('/resume', multerUpload('resume'), uploadResume);
 router.post('/parse-resume', multerUpload('resume'), parseResume);
+router.post('/parse-jd', multerUpload('resume'), parseJobDescriptionPdf);
 router.get('/signed-url', signedUrl);
 router.post('/document', multerUpload('document'), uploadDocument);
 router.post('/profile-photo', multerUpload('profile'), uploadProfilePhoto);

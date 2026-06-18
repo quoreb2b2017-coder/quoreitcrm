@@ -306,7 +306,7 @@ const LegalAndLitigationPage = () => {
                                     transition={{ duration: 0.8, delay: 0.6 }}
                                     className="flex flex-col sm:flex-row gap-4 pt-6 justify-center lg:justify-start"
                                 >
-                                    <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                                    <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                                         <button
                                             className="group relative px-8 py-4 bg-gradient-to-r from-[#00d9a6] to-cyan-500 hover:from-[#00d9a6] hover:to-blue-600 text-white font-semibold rounded-full shadow-2xl transform transition-all duration-300 hover:scale-105 text-base"
                                         >
@@ -421,7 +421,7 @@ const LegalAndLitigationPage = () => {
                                 <p className="text-base md:text-lg text-gray-600 leading-[1.3] text-justify mb-6" style={{ wordSpacing: '-1px' }}>
                                     We provide the technical edge your team needs to manage complex cases efficiently, ensuring every piece of evidence is organized, analyzed, and ready for the courtroom.
                                 </p>
-                                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                                     <button
                                         className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-[#c5f82a] to-[#00d9a6] hover:from-[#00d9a6] hover:to-cyan-500 text-white font-semibold rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 shadow-lg text-sm md:text-base"
                                     >
@@ -456,7 +456,7 @@ const LegalAndLitigationPage = () => {
                                 <p className="text-base md:text-lg text-gray-600 leading-[1.3] text-justify mb-6" style={{ wordSpacing: '-1px' }}>
                                     Our deep network and discreet approach ensure you have access to top legal talent, whether you're expanding a practice group or building an in-house legal department.
                                 </p>
-                                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                                     <button
                                         className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-[#c5f82a] to-[#00d9a6] hover:from-[#00d9a6] hover:to-cyan-500 text-white font-semibold rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 shadow-lg text-sm md:text-base"
                                     >
@@ -522,7 +522,7 @@ const LegalAndLitigationPage = () => {
                                 <p className="text-base md:text-lg text-gray-600 leading-[1.3] text-justify mb-6" style={{ wordSpacing: '-1px' }}>
                                     From contract lifecycle management to spend analysis, we provide the operational expertise that allows your attorneys to focus on practicing law.
                                 </p>
-                                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                                     <button
                                         className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-[#c5f82a] to-[#00d9a6] hover:from-[#00d9a6] hover:to-cyan-500 text-white font-semibold rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 shadow-lg text-sm md:text-base"
                                     >
@@ -556,7 +556,7 @@ const LegalAndLitigationPage = () => {
                                 <p className="text-base md:text-lg text-gray-600 leading-[1.3] text-justify mb-6" style={{ wordSpacing: '-1px' }}>
                                     Whether for temporary project support or permanent placement, our candidates come vetted, experienced, and ready to hit the ground running.
                                 </p>
-                                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                                     <button
                                         className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-[#c5f82a] to-[#00d9a6] hover:from-[#00d9a6] hover:to-cyan-500 text-white font-semibold rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 shadow-lg text-sm md:text-base"
                                     >

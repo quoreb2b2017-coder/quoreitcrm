@@ -24,6 +24,7 @@ import { RouteGuard } from '@/components/RouteGuard';
 import api from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAccessToken } from '@/lib/tokenStore';
+import { getSocketOrigin } from '@/lib/apiConfig';
 import { useNotifications } from '@/contexts/NotificationContext';
 
 type ChatJob = {
@@ -56,11 +57,7 @@ type OnlineUser = {
 
 type SocketAck<T = unknown> = { ok: boolean; error?: string; data?: T };
 
-const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL ??
-  (process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1$/, '')
-    : 'http://localhost:4000');
+const SOCKET_URL = getSocketOrigin();
 
 const formatSidebarTime = (value?: string | null) => {
   if (!value) return '';

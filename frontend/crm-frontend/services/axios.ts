@@ -1,10 +1,9 @@
 import axios, { type AxiosError } from 'axios';
 import { getAccessToken, setAccessToken } from '@/lib/tokenStore';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
+import { getApiUrl } from '@/lib/apiConfig';
 
 export const axiosClient = axios.create({
-  baseURL: API_URL,
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,6 +14,7 @@ export const axiosClient = axios.create({
 // Let browser set Content-Type for FormData (multipart/form-data + boundary)
 axiosClient.interceptors.request.use((config) => {
   if (typeof window === 'undefined') return config;
+  config.baseURL = getApiUrl();
   const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -54,9 +54,8 @@ axiosClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Don't attempt refresh loops on auth endpoints
+    // Don't attempt refresh loops on auth endpoints; don't wipe token on refresh failure here
     if (url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh')) {
-      setAccessToken(null);
       return Promise.reject(error);
     }
 

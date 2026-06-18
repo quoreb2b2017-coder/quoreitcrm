@@ -5,6 +5,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Home, ChevronRight, ArrowRight, Star, Users, Award, Globe, Shield, Target, CheckCircle, Heart } from 'lucide-react';
+import { seededPercent, seededRange } from '@/utils/deterministicRandom';
 
 const services = [
   {
@@ -286,7 +287,7 @@ const Firstpage = () => {
         </motion.button>   
       </Link>     */}
 
-            <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+            <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
               <motion.button
                 className="w-60 h-16 border-2 border-[#00D8A6] text-[#00D8A6] font-bold text-lg rounded-lg hover:bg-[#00D8A6] hover:text-black transition-all duration-300 flex items-center justify-center backdrop-blur-sm"
                 whileHover={{ scale: 1.05, y: -2 }}
@@ -928,7 +929,7 @@ const Firstpage = () => {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+            <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
               <motion.button
                 className="group relative w-72 h-20 border-2 border-[#00D8A6] text-[#00D8A6] font-bold text-lg rounded-2xl hover:bg-[#00D8A6] hover:text-black transition-all duration-500 flex items-center justify-center backdrop-blur-lg bg-white/5 shadow-2xl overflow-hidden"
                 whileHover={{
@@ -976,17 +977,17 @@ const Firstpage = () => {
               key={i}
               className="absolute w-2 h-2 bg-[#00D8A6]/30 rounded-full"
               style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                left: `${seededPercent(i + 1)}%`,
+                top: `${seededPercent(i + 101)}%`,
               }}
               animate={{
                 y: [0, -20, 0],
                 opacity: [0.3, 0.8, 0.3],
               }}
               transition={{
-                duration: 3 + Math.random() * 2,
+                duration: seededRange(i + 2, 3, 5),
                 repeat: Infinity,
-                delay: Math.random() * 2,
+                delay: seededRange(i + 3, 0, 2),
               }}
             />
           ))}

@@ -21,16 +21,30 @@ const PIPELINE_STAGES: ApplicationStatus[] = [
   'rejected',
 ];
 
+function getRefIdString(value: unknown): string {
+  if (value == null) return '';
+  if (typeof value === 'object') {
+    const obj = value as { _id?: { toString(): string }; toString?: () => string };
+    if (obj._id != null) return obj._id.toString();
+    if (typeof obj.toString === 'function') {
+      const s = obj.toString();
+      if (s && s !== '[object Object]') return s;
+    }
+  }
+  return String(value);
+}
+
 function toAppItem(
   app: IApplication & { createdAt: Date; updatedAt: Date },
   candidate?: { name: string; email: string } | null,
   job?: { title: string } | null,
   resumeUrl?: string | null
 ) {
-  const candidateIdStr = app.candidateId?.toString() ?? app.crmCandidateId?.toString() ?? '';
+  const candidateIdStr =
+    getRefIdString(app.candidateId) || getRefIdString(app.crmCandidateId) || '';
   return {
     id: app._id.toString(),
-    jobId: app.jobId.toString(),
+    jobId: getRefIdString(app.jobId),
     candidateId: candidateIdStr,
     stage: app.status,
     createdAt: app.createdAt.toISOString(),
@@ -38,6 +52,8 @@ function toAppItem(
     candidate: candidate ?? null,
     job: job ?? null,
     resumeUrl: resumeUrl ?? null,
+    questionAnswers: app.questionAnswers ?? [],
+    source: app.source ?? 'crm',
   };
 }
 
@@ -126,9 +142,16 @@ export const apply = asyncHandler(async (req: Request, res: Response): Promise<v
 export const list = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const role = req.user?.role;
   const userId = req.user?.userId;
-  const query = req.query as { jobId?: string; candidateId?: string; stage?: string; page?: string; limit?: string };
+  const query = req.query as { jobId?: string; candidateId?: string; stage?: string; source?: string; page?: string; limit?: string };
 
   const filter: Record<string, unknown> = {};
+  if (query.source) {
+    if (query.source === 'public') {
+      filter.source = 'public';
+    } else {
+      filter.source = query.source;
+    }
+  }
   const recruiterJobIds = role === 'recruiter' && userId ? await getRecruiterJobIds(userId) : [];
 
   if (role === 'recruiter' && userId) {
@@ -208,11 +231,12 @@ export const list = asyncHandler(async (req: Request, res: Response): Promise<vo
       });
     }
 
-    // Hiring Pipeline is based on CRM candidates added from the Candidates page.
-    // Recruiters must not see another recruiter's candidate cards even when they
-    // share the same assigned job.
-    filter.crmCandidateId = { $in: ownedCandidateIds };
-    delete filter.$or;
+    // Hiring Pipeline: recruiter's CRM candidates + public applicants on assigned jobs
+    filter.$or = [
+      { crmCandidateId: { $in: ownedCandidateIds } },
+      { source: 'public', jobId: { $in: recruiterJobIds } },
+    ];
+    delete filter.crmCandidateId;
   }
 
   const page = Math.max(1, parseInt(query.page ?? '1', 10));
@@ -278,12 +302,16 @@ export const list = asyncHandler(async (req: Request, res: Response): Promise<vo
 
   const data: ReturnType<typeof toAppItem>[] = [];
   for (const i of items) {
-    const app = i as IApplication & { createdAt: Date; updatedAt: Date; crmCandidateId?: mongoose.Types.ObjectId };
+    const app = i as IApplication & { createdAt: Date; updatedAt: Date; crmCandidateId?: mongoose.Types.ObjectId; source?: string; firstName?: string; lastName?: string; email?: string; resumeUrl?: string };
     const job = i.jobId as unknown as { _id: mongoose.Types.ObjectId; title: string } | null;
     let candidate: { name: string; email: string } | null = null;
     let resumeUrl: string | null = null;
-    if (app.crmCandidateId) {
-      const crm = crmById[app.crmCandidateId.toString()];
+    if (app.source === 'public' || (app.email && !app.crmCandidateId && !app.candidateId)) {
+      const name = `${app.firstName ?? ''} ${app.lastName ?? ''}`.trim() || 'Applicant';
+      candidate = { name, email: app.email ?? '' };
+      resumeUrl = app.resumeUrl ?? null;
+    } else if (app.crmCandidateId) {
+      const crm = crmById[getRefIdString(app.crmCandidateId)];
       candidate = crm ? { name: crm.name, email: crm.email } : { name: 'Unknown', email: '' };
     } else {
       const cand = i.candidateId as unknown as { _id: mongoose.Types.ObjectId; name?: string; email?: string } | null;
@@ -336,19 +364,22 @@ export const updateStage = asyncHandler(async (req: Request, res: Response): Pro
     if (!recruiterJobIds.some((jid) => jid.toString() === jobIdStr)) {
       throw new AppError(403, 'You can only update applications for jobs assigned to you');
     }
-    const crmCandidateId = (existing as { crmCandidateId?: mongoose.Types.ObjectId | null }).crmCandidateId;
-    if (!crmCandidateId) {
+    const crmCandidateId = (existing as { crmCandidateId?: mongoose.Types.ObjectId | null; source?: string }).crmCandidateId;
+    const source = (existing as { source?: string }).source;
+    if (!crmCandidateId && source !== 'public') {
       throw new AppError(403, 'You can only update your own CRM candidate applications');
     }
-    const ownedCandidate = await Candidate.findOne({
-      _id: crmCandidateId,
-      recruiterId: new mongoose.Types.ObjectId(userId),
-      $or: [{ isBlocked: false }, { isBlocked: { $exists: false } }, { isBlocked: null }],
-    })
-      .select('_id')
-      .lean();
-    if (!ownedCandidate) {
-      throw new AppError(403, 'You can only update your own candidate pipeline');
+    if (crmCandidateId) {
+      const ownedCandidate = await Candidate.findOne({
+        _id: crmCandidateId,
+        recruiterId: new mongoose.Types.ObjectId(userId),
+        $or: [{ isBlocked: false }, { isBlocked: { $exists: false } }, { isBlocked: null }],
+      })
+        .select('_id')
+        .lean();
+      if (!ownedCandidate) {
+        throw new AppError(403, 'You can only update your own candidate pipeline');
+      }
     }
   }
 
@@ -406,23 +437,31 @@ export const getApplicationResume = asyncHandler(async (req: Request, res: Respo
       throw new AppError(403, 'You do not have access to this application');
     }
 
-    const appWithCrm = app as { crmCandidateId?: mongoose.Types.ObjectId | null };
-    if (!appWithCrm.crmCandidateId) {
+    const appWithCrm = app as { crmCandidateId?: mongoose.Types.ObjectId | null; source?: string };
+    if (!appWithCrm.crmCandidateId && appWithCrm.source !== 'public') {
       throw new AppError(403, 'You can only access your own CRM candidate applications');
     }
-    const ownedCandidate = await Candidate.findOne({
-      _id: appWithCrm.crmCandidateId,
-      recruiterId: new mongoose.Types.ObjectId(userId),
-      $or: [{ isBlocked: false }, { isBlocked: { $exists: false } }, { isBlocked: null }],
-    })
-      .select('_id')
-      .lean();
-    if (!ownedCandidate) {
-      throw new AppError(403, 'You can only access your own candidate applications');
+    if (appWithCrm.crmCandidateId) {
+      const ownedCandidate = await Candidate.findOne({
+        _id: appWithCrm.crmCandidateId,
+        recruiterId: new mongoose.Types.ObjectId(userId),
+        $or: [{ isBlocked: false }, { isBlocked: { $exists: false } }, { isBlocked: null }],
+      })
+        .select('_id')
+        .lean();
+      if (!ownedCandidate) {
+        throw new AppError(403, 'You can only access your own candidate applications');
+      }
     }
   }
 
-  const appWithCrm = app as { crmCandidateId?: mongoose.Types.ObjectId };
+  const appWithCrm = app as { crmCandidateId?: mongoose.Types.ObjectId; source?: string; resumeUrl?: string };
+  if (appWithCrm.source === 'public') {
+    if (!appWithCrm.resumeUrl) throw new AppError(404, 'No resume uploaded for this application');
+    res.redirect(302, appWithCrm.resumeUrl);
+    return;
+  }
+
   if (appWithCrm.crmCandidateId) {
     throw new AppError(404, 'No resume uploaded for this candidate');
   }

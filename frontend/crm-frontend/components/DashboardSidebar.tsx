@@ -26,6 +26,8 @@ import {
   Search,
   X,
   Zap,
+  Globe,
+  UserCheck,
 } from 'lucide-react';
 
 const ICON = 18;
@@ -72,6 +74,22 @@ const primaryNav: NavItem[] = [
     label: 'Projects',
     icon: <FolderKanban size={ICON} strokeWidth={1.75} />,
     roles: ['admin', 'recruiter'],
+  },
+];
+
+/** Admin: jobs & applicants for quoreit.com/open-jobs */
+const publicWebsiteNav: NavItem[] = [
+  {
+    href: '/dashboard/public-jobs',
+    label: 'Public Jobs',
+    icon: <Globe size={ICON} strokeWidth={1.75} />,
+    roles: ['admin'],
+  },
+  {
+    href: '/dashboard/public-applications',
+    label: 'Public Applicants',
+    icon: <UserCheck size={ICON} strokeWidth={1.75} />,
+    roles: ['admin'],
   },
 ];
 
@@ -266,6 +284,13 @@ export function DashboardSidebar() {
         <NavSection
           items={primaryNav}
           label="Workspace"
+          pathname={pathname}
+          hasRole={hasRole}
+          onClick={() => setMobileOpen(false)}
+        />
+        <NavSection
+          items={publicWebsiteNav}
+          label="Public Website"
           pathname={pathname}
           hasRole={hasRole}
           onClick={() => setMobileOpen(false)}

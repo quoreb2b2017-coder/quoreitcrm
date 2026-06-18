@@ -81,7 +81,7 @@ const Navbar = () => {
     { name: 'FIND  TALENT', href: '/Find-tech-talent' },
     { name: 'WHAT WE DO', href: '/What-we-do' },
     { name: 'NEWS & EVENTS', href: 'https://blog.quoreit.com/' },
-    { name: 'OPEN JOBS', href: 'https://open-jobs.quoreit.com/' },
+    { name: 'OPEN JOBS', href: '/open-jobs' },
     { name: 'ABOUT US', href: '/About-Us' },
     { name: 'CONTACT US', href: '/Contact-us' },
   ];

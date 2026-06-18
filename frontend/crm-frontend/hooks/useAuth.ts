@@ -2,17 +2,27 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/services/api';
-import { setAccessToken } from '@/lib/tokenStore';
+import { getAccessToken, setAccessToken } from '@/lib/tokenStore';
 import toast from 'react-hot-toast';
-import type { LoginCredentials, RegisterPayload } from '@/types';
+import type { LoginCredentials, RegisterPayload, User } from '@/types';
 
 const AUTH_ME_KEY = ['auth', 'me'] as const;
 
-/** Fetches session: tries refresh (cookie) first. On 401/network error returns null so we redirect to login without throwing. */
-async function fetchSession() {
+/** Restore session: valid access token first, then refresh cookie. */
+async function fetchSession(): Promise<User | null> {
+  const existing = getAccessToken();
+  if (existing) {
+    try {
+      const { data } = await api.auth.me();
+      if (data?.success && data.data) return data.data;
+    } catch {
+      /* access token expired — try refresh below */
+    }
+  }
+
   try {
     const { data } = await api.auth.refresh();
-    if (!data.success || !data.data) {
+    if (!data?.success || !data.data) {
       setAccessToken(null);
       return null;
     }
@@ -84,7 +94,6 @@ export function useLogout() {
   return useMutation({
     mutationFn: () => api.auth.logout(),
     onSuccess: clearSessionAndGoHome,
-    // Still leave the app if the logout request fails (network); cookie may clear on next full session check.
     onError: clearSessionAndGoHome,
   });
 }

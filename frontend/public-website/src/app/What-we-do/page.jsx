@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Head from "next/head";
+import { seededInt } from '@/utils/deterministicRandom';
 
 const WhatWeDo = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -278,7 +279,7 @@ const WhatWeDo = () => {
             
             {/* CTA Buttons with improved spacing */}
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8">
-              <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+              <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                 <button 
                   className="group px-10 py-5 bg-green-400 text-slate-900 font-semibold rounded-lg hover:bg-green-300 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center text-lg"
                 >
@@ -598,7 +599,7 @@ const WhatWeDo = () => {
                 </div>
                 <div className={`p-4 rounded-xl ${sector.bgColor} group-hover:${sector.bgColor} transition-all duration-300`}>
                   <p className="text-xs text-slate-500 text-center font-medium">
-                    {Math.floor(Math.random() * 50 + 50)}+ Active Placements
+                    {seededInt(index + 1, 50, 99)}+ Active Placements
                   </p>
                 </div>
               </div>

@@ -76,6 +76,13 @@ const upload = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
+  parseJobDescription: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return axiosClient.post<ApiResponse<{ text: string }>>('/upload/parse-jd', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
   introVideo: (file: File, onUploadProgress?: (progress: number) => void) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -155,9 +162,9 @@ const analytics = {
 };
 
 const applications = {
-  list: (params?: { jobId?: string; stage?: string; limit?: number }) =>
+  list: (params?: { jobId?: string; stage?: string; source?: string; limit?: number; page?: number }) =>
     axiosClient.get<ApiResponse<Application[]>>('/applications', { params }),
-  listPaginated: (params?: { jobId?: string; candidateId?: string; stage?: string; limit?: number; page?: number }) =>
+  listPaginated: (params?: { jobId?: string; candidateId?: string; stage?: string; source?: string; limit?: number; page?: number }) =>
     axiosClient.get<ApiResponse<{ items: any[]; total: number; page: number; limit: number; totalPages: number }>>('/applications', { params }),
   addToPipeline: (jobId: string, crmCandidateId: string) =>
     axiosClient.post<ApiResponse<Application>>('/applications/add-to-pipeline', { jobId, crmCandidateId }),

@@ -354,7 +354,7 @@ const SenecaServicesPage = () => {
                   transition={{ duration: 0.8, delay: 0.6 }}
                   className="flex flex-col sm:flex-row gap-4 pt-6 justify-center lg:justify-start"
                 >
-                  <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                  <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                     <button
                       className="group relative px-8 py-4 bg-gradient-to-r from-[#00d9a6] to-cyan-500 hover:from-[#00d9a6] hover:to-blue-600 text-white font-semibold rounded-full shadow-2xl transform transition-all duration-300 hover:scale-105 text-base"
                     >
@@ -508,7 +508,7 @@ const SenecaServicesPage = () => {
                 <p className="text-base md:text-lg text-gray-600 leading-[1.3] text-justify mb-6" style={{ wordSpacing: '-1px' }}>
                   By designing, developing, deploying, and operating mission-critical applications with efficiency, we help your teams deliver faster, smarter, and more reliably than ever before.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-[#c5f82a] to-[#00d9a6] hover:from-[#00d9a6] hover:to-cyan-500 text-white font-semibold rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 shadow-lg text-sm md:text-base"
                     aria-label="Get started with DevOps services"
@@ -544,7 +544,7 @@ const SenecaServicesPage = () => {
                 <p className="text-base md:text-lg text-gray-600 leading-[1.3] text-justify mb-6" style={{ wordSpacing: '-1px' }}>
                   We provide the talent and expertise to safeguard your data helping you prevent, detect, and respond to cyber threats quickly and effectively with cutting-edge solutions.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-[#c5f82a] to-[#00d9a6] hover:from-[#00d9a6] hover:to-cyan-500 text-white font-semibold rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 shadow-lg text-sm md:text-base"
                     aria-label="Get started with Cybersecurity services"
@@ -611,7 +611,7 @@ const SenecaServicesPage = () => {
                 <p className="text-base md:text-lg text-gray-600 leading-[1.3] text-justify mb-6" style={{ wordSpacing: '-1px' }}>
                   Whether it's AI, storage, compute, supercomputing, or networking, we help you maximize the value of your IT investments. From building to moving to managing data in the cloud, we deliver the talent and expertise to make it seamless.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-[#c5f82a] to-[#00d9a6] hover:from-[#00d9a6] hover:to-cyan-500 text-white font-semibold rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 shadow-lg text-sm md:text-base"
                     aria-label="Get started with Cloud services"
@@ -647,7 +647,7 @@ const SenecaServicesPage = () => {
                 <p className="text-base md:text-lg text-gray-600 leading-[1.3] text-justify mb-6" style={{ wordSpacing: '-1px' }}>
                   At Quore IT, we specialize in the development, customization, and deployment of leading ERP platforms including SAP, Oracle, Microsoft, and Salesforce, whether on-premises or in the cloud. Our experts ensure your ERP systems are tailored to support your goals and maximize business impact.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-[#c5f82a] to-[#00d9a6] hover:from-[#00d9a6] hover:to-cyan-500 text-white font-semibold rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transform hover:scale-105 shadow-lg text-sm md:text-base"
                     aria-label="Get started with ERP services"
@@ -839,7 +839,7 @@ const SenecaServicesPage = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+              <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                 <button
                   className="inline-flex items-center px-10 py-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 hover:shadow-2xl transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-gray-300 text-lg transform hover:scale-105 hover:-translate-y-1"
                   aria-label="Get started with engineering specialty services"

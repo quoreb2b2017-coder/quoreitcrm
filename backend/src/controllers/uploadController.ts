@@ -3,6 +3,7 @@ import { uploadByType, deleteFromCloudinary } from '../services/uploadService.js
 import { AppError } from '../utils/AppError.js';
 import { createRequire } from 'module';
 import { cloudinary } from '../config/cloudinary.js';
+import { extractPdfText } from '../utils/extractPdfText.js';
 const require = createRequire(import.meta.url);
 
 export async function uploadResume(req: Request, res: Response) {
@@ -237,6 +238,22 @@ export async function parseResume(req: Request, res: Response) {
       skills: foundSkills
     }
   });
+}
+
+/** POST /upload/parse-jd — extract JD text from PDF only (no file storage) */
+export async function parseJobDescriptionPdf(req: Request, res: Response) {
+  if (!req.file?.buffer) {
+    throw new AppError(400, 'No file uploaded');
+  }
+  const text = await extractPdfText(
+    req.file.buffer,
+    req.file.originalname,
+    req.file.mimetype
+  );
+  if (!text.trim()) {
+    throw new AppError(400, 'Could not extract text from this PDF. Try a text-based PDF.');
+  }
+  res.json({ success: true, data: { text } });
 }
 
 export async function uploadDocument(req: Request, res: Response) {

@@ -371,7 +371,7 @@ const SenecaServicesPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.2, duration: 0.8 }}
                 >
-                  <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                  <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                     <button
                       className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#00d9a6] to-cyan-500 hover:from-[#00d9a6] hover:to-blue-600 text-white font-semibold text-base sm:text-lg rounded-full shadow-2xl transform transition-all duration-300 hover:scale-105 w-full sm:w-auto"
                     >
@@ -541,7 +541,7 @@ const SenecaServicesPage = () => {
                 <p className="text-base sm:text-lg text-gray-600 leading-[1.3] sm:leading-[1.2] text-justify" style={{ wordSpacing: '-1px' }}>
                   Finding the right talent in the automotive industry can be complex especially when precision and efficiency are critical. We understand the unique demands of this space and bring proven expertise to every engagement. From process and manufacturing engineering to logistics, skilled trades, and automation, we provide a strong network of automotive-focused professionals who keep your projects moving forward without costly setbacks.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#00d9a6] to-cyan-500 hover:from-[#00d9a6] text-white font-bold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/50 text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start"
                     aria-label="Get started with Automotive engineering services"
@@ -576,7 +576,7 @@ const SenecaServicesPage = () => {
                 <p className="text-base sm:text-lg text-gray-600 leading-[1.3] sm:leading-[1.2] text-justify" style={{ wordSpacing: '-1px' }}>
                   The energy and utility sector is transforming faster than ever, and Quore IT is evolving right alongside it. We deliver specialized teams of electrical engineers, project managers, technicians, and more, wherever they're needed most. With deep knowledge of established systems and a keen eye on emerging innovations, we help clients navigate both legacy challenges and the industry's rapid changes.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#00d9a6] to-cyan-500 hover:from-[#00d9a6] text-white font-bold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-500/50 text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start"
                     aria-label="Get started with Energy/Utility staffing services"
@@ -657,7 +657,7 @@ const SenecaServicesPage = () => {
                 <p className="text-base sm:text-lg text-gray-600 leading-[1.3] sm:leading-[1.2] text-justify mb-4 sm:mb-6" style={{ wordSpacing: '-1px' }}>
                   Whether you need a single skilled resource or a full team of engineers, Quore IT Resources can deploy proven resources at a moment's notice to ensure your systems remain operational and efficient.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#c5f82a] to-[#00d9a6] hover:from-[#00d9a6] hover:to-cyan-500 text-white font-bold rounded-full transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/50 transform hover:scale-105 shadow-lg text-sm sm:text-base w-full sm:w-auto justify-center sm:justify-start"
                     aria-label="Get started with Infrastructure Engineering services"
@@ -858,7 +858,7 @@ const SenecaServicesPage = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+              <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                 <button
                   className="inline-flex items-center px-8 sm:px-10 py-3 sm:py-4 bg-gray-900 text-white font-semibold text-base sm:text-lg rounded-xl hover:bg-gray-800 hover:shadow-2xl transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-gray-300 transform hover:scale-105 hover:-translate-y-1 w-full sm:w-auto justify-center"
                   aria-label="Get started with engineering specialty services"

@@ -61,8 +61,8 @@ export const config = {
     origins: (
       getEnvOptional(
         'CORS_ORIGINS',
-        'https://quoreitcrm.vercel.app,http://localhost:3000,http://localhost:3001'
-      ) ?? 'https://quoreitcrm.vercel.app,http://localhost:3000,http://localhost:3001'
+        'https://quoreitcrm.vercel.app,http://localhost:3000,http://localhost:3001,http://localhost:3002,https://www.quoreit.com,https://quoreit.com'
+      ) ?? 'https://quoreitcrm.vercel.app,http://localhost:3000,http://localhost:3001,http://localhost:3002,https://www.quoreit.com,https://quoreit.com'
     )
       .split(',')
       .map((s) => s.trim())

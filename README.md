@@ -56,7 +56,7 @@ cd frontend/crm-frontend && npm run dev
 cd frontend/public-website && npm run dev
 ```
 
-Visit: http://localhost:3000
+Visit CRM: http://localhost:3000 | Public site: http://localhost:3002 | Open jobs: http://localhost:3002/open-jobs
 
 ## Features
 

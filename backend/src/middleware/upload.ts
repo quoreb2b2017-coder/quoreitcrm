@@ -76,3 +76,10 @@ export const multerResumeDisk = multer({
   limits: { fileSize: MAX_FILE_SIZE },
   fileFilter: fileFilter('resume'),
 }).single('file');
+
+/** Public job application resume upload (no auth). Field name: resume */
+export const multerPublicResume = multer({
+  storage: memoryStorage,
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: fileFilter('resume'),
+}).single('resume');

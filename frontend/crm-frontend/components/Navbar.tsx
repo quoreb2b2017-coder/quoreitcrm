@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/services/api';
 import { io, type Socket } from 'socket.io-client';
 import { getAccessToken } from '@/lib/tokenStore';
+import { getSocketOrigin } from '@/lib/apiConfig';
 
 /** Internal base link type */
 type NavLink = {
@@ -58,11 +59,7 @@ export function Navbar() {
   const socketRef = useRef<Socket | null>(null);
   const STORAGE_KEY = `ats:seen-notifs:${user?.id ?? 'anon'}`;
 
-  const SOCKET_URL =
-    process.env.NEXT_PUBLIC_SOCKET_URL ??
-    (process.env.NEXT_PUBLIC_API_URL
-      ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1$/, '')
-      : 'http://localhost:4000');
+  const SOCKET_URL = getSocketOrigin();
 
   const canUseNotifications = hasRole('admin') || hasRole('recruiter');
 

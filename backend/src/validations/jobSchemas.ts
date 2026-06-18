@@ -25,7 +25,7 @@ export const createJobSchema = z.object({
   requirements: z.array(z.string().max(1000)).max(50).default([]),
   customFields: z.array(z.object({
     name: z.string().max(100).trim(),
-    value: z.string().max(2000).trim(),
+    value: z.string().max(8000).trim(),
   })).max(50).default([]),
   recruiterIds: z.array(z.string().regex(/^[a-f0-9]{24}$/i)).default([]).optional(),
   status: jobStatusApiEnum.default('open'),

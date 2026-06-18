@@ -16,6 +16,7 @@ import candidateRoutes from './candidates.js';
 import clientRoutes from './clients.js';
 import messageRoutes from './messages.js';
 import emailRoutes from './emails.js';
+import publicRoutes from './public.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/role.js';
 
@@ -38,6 +39,7 @@ router.use('/candidates', candidateRoutes);
 router.use('/clients', clientRoutes);
 router.use('/messages', messageRoutes);
 router.use('/emails', emailRoutes);
+router.use('/public', publicRoutes);
 
 // Example: admin-only route
 router.get('/admin/stats', authMiddleware, requireAdmin, (_req, res) => {

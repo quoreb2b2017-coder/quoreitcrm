@@ -4,12 +4,9 @@ import { createContext, useContext, useEffect, useRef, useState, useCallback } f
 import { io, type Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { getAccessToken } from '@/lib/tokenStore';
+import { getSocketOrigin } from '@/lib/apiConfig';
 
-const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL ??
-  (process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/v1$/, '')
-    : 'http://localhost:4000');
+const SOCKET_URL = getSocketOrigin();
 
 type NotifContextValue = {
   // jobId → unread count (real-time only)

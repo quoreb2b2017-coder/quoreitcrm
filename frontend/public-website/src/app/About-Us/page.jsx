@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Head from 'next/head';
 import { ChevronRight, Users, Target, Shield, Zap, CheckCircle, ArrowRight, Award, TrendingUp, Globe, Star, PlayCircle } from 'lucide-react';
+import { seededPercent, seededRange } from '@/utils/deterministicRandom';
 
 const AboutPage = () => {
   const [isVisible, setIsVisible] = useState({});
@@ -121,10 +122,10 @@ const AboutPage = () => {
                 key={i}
                 className="absolute w-2 h-2 bg-[#00d9a6] rounded-full animate-pulse"
                 style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${2 + Math.random() * 2}s`
+                  left: `${seededPercent(i + 1)}%`,
+                  top: `${seededPercent(i + 51)}%`,
+                  animationDelay: `${seededRange(i + 2, 0, 3)}s`,
+                  animationDuration: `${seededRange(i + 3, 2, 4)}s`
                 }}
               />
             ))}
@@ -431,10 +432,10 @@ const AboutPage = () => {
                 key={i}
                 className="absolute w-1 h-1 bg-[#00d9a6] rounded-full animate-pulse"
                 style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 2}s`,
-                  animationDuration: `${1 + Math.random()}s`
+                  left: `${seededPercent(i + 200)}%`,
+                  top: `${seededPercent(i + 250)}%`,
+                  animationDelay: `${seededRange(i + 201, 0, 2)}s`,
+                  animationDuration: `${seededRange(i + 202, 1, 2)}s`
                 }}
               />
             ))}
@@ -476,10 +477,10 @@ const AboutPage = () => {
                 key={i}
                 className="absolute w-2 h-2 bg-white rounded-full animate-bounce"
                 style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${2 + Math.random() * 2}s`
+                  left: `${seededPercent(i + 1)}%`,
+                  top: `${seededPercent(i + 51)}%`,
+                  animationDelay: `${seededRange(i + 2, 0, 3)}s`,
+                  animationDuration: `${seededRange(i + 3, 2, 4)}s`
                 }}
               />
             ))}
@@ -499,7 +500,7 @@ const AboutPage = () => {
               Let's discuss how QUORE IT can help you find the right talent for your next big project. Our experts are ready to understand your unique requirements and deliver exceptional results.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center mb-12">
-              <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+              <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                 <button className="bg-white text-[#00d9a6] px-10 py-5 rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-300 inline-flex items-center justify-center space-x-3 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 hover:scale-105">
                   <span>Get Started Today</span>
                   <ArrowRight className="w-6 h-6" />

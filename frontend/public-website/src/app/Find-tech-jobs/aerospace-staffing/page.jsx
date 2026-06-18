@@ -457,7 +457,7 @@ const AerospaceStaffingPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.1, duration: 0.6 }}
                 >
-                  <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                  <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                     <motion.button
                       className="group relative px-8 py-4 bg-gradient-to-r from-[#00d9a6] to-[#00d9a6] text-white font-bold rounded-full text-lg shadow-xl overflow-hidden"
                       whileHover={{ scale: 1.05 }}
@@ -651,7 +651,7 @@ const AerospaceStaffingPage = () => {
                         {service.description}
                       </p>
                       <div className="mt-auto">
-                        <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                        <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                           <button
                             className="inline-flex items-center bg-gradient-to-r from-[#00d9a6] to-[#00d9a6] hover:from-[#00d9a6] hover:to-[#00d9a6] text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg transition-all duration-300 hover:shadow-lg hover:shadow-green-500/25 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-500/50"
                             aria-label={`Learn more about ${service.title} services`}
@@ -833,7 +833,7 @@ const AerospaceStaffingPage = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+              <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                 <button
                   className="inline-flex items-center px-10 py-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 hover:shadow-2xl transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-gray-300 text-lg transform hover:scale-105 hover:-translate-y-1"
                   aria-label="Get started with engineering specialty services"

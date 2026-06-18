@@ -350,7 +350,7 @@ const GovernmentServicesPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.5 }}
                 >
-                  <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                  <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                     <button
                       className="group relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-[#00d9a6] to-[#00D9A6] text-gray-900 font-semibold rounded-xl hover:shadow-2xl hover:shadow-[#00d9a6]/20 transition-all duration-500 transform hover:scale-105 hover:-translate-y-1"
                     >
@@ -464,7 +464,7 @@ const GovernmentServicesPage = () => {
                 <p className="text-lg text-gray-600 leading-[1.2] text-justify" style={{ wordSpacing: '-1px' }}>
                   We support defense and intelligence organizations with end-to-end technology expertise and skilled talent. Our capabilities span Enterprise IT, full-spectrum Software engineering, ERP platforms (SAP and Oracle), Systems Engineering and Administration, Application Development, Data Analytics, Cloud Computing, and Cybersecurity. We deliver the right professionals to strengthen mission readiness and ensure secure, efficient operations.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#00D9A6] to-[#00d9a6] text-gray-900 font-semibold rounded-xl hover:shadow-xl hover:shadow-green-200 transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-green-200 transform hover:scale-105 hover:-translate-y-1"
                     aria-label="Get started with Defense & Intel services"
@@ -493,7 +493,7 @@ const GovernmentServicesPage = () => {
                 <p className="text-lg text-gray-600 leading-[1.2] text-justify" style={{ wordSpacing: '-1px' }}>
                   We bring proven expertise in supporting the IT and workforce needs of large government organizations. We partner with federal civilian agencies, homeland security, and justice departments to deliver a wide range of tailored solutions. From Data Analysis and Cybersecurity to Application Development, Project Management, ETL Engineering, and Quality Assurance. We provide skilled professionals who help government initiatives run efficiently, securely, and with measurable impact.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#00D9A6] to-[#00d9a6] text-gray-900 font-semibold rounded-xl hover:shadow-xl hover:shadow-green-200 transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-green-200 transform hover:scale-105 hover:-translate-y-1"
                     aria-label="Get started with Federal Civilian, Homeland & Justice services"
@@ -548,7 +548,7 @@ const GovernmentServicesPage = () => {
                 <p className="text-lg text-gray-600 leading-[1.2] text-justify" style={{ wordSpacing: '-1px' }}>
                   We provide support, planning, implementation, transitioning, operating and maintenance expertise to keep health initiatives running smoothly. From maintaining CMS applications to providing support Cloud Computing Services for Infrastructure as a Service (IaaS) and scalable Cloud based Platform as a Service (PaaS) applications.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#00D9A6] to-[#00d9a6] text-gray-900 font-semibold rounded-xl hover:shadow-xl hover:shadow-green-200 transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-green-200 transform hover:scale-105 hover:-translate-y-1"
                     aria-label="Get started with Federal Health services"
@@ -577,7 +577,7 @@ const GovernmentServicesPage = () => {
                 <p className="text-lg text-gray-600 leading-[1.2] text-justify" style={{ wordSpacing: '-1px' }}>
                   State and local governments, as well as educational institutions, face constantly evolving challenges that demand agility and innovation. Quore IT partners with SLED organizations to strengthen their capabilities through scalable talent solutions and specialized expertise. From Project and Program Management to Cybersecurity, Data science, Application Development, and beyond. We provide the skilled professionals needed to drive efficiency, security, and long-term impact.
                 </p>
-                <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+                <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                   <button
                     className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#00D9A6] to-[#00d9a6] text-gray-900 font-semibold rounded-xl hover:shadow-xl hover:shadow-green-200 transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-green-200 transform hover:scale-105 hover:-translate-y-1"
                     aria-label="Get started with State, Local & Education services"
@@ -790,7 +790,7 @@ const GovernmentServicesPage = () => {
               transition={{ duration: 0.8, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <a href="https://open-jobs.quoreit.com/" target="_blank" rel="noopener noreferrer">
+              <a href="/open-jobs" target="_blank" rel="noopener noreferrer">
                 <button
                   className="inline-flex items-center px-10 py-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 hover:shadow-2xl transition-all duration-500 focus:outline-none focus:ring-4 focus:ring-gray-300 text-lg transform hover:scale-105 hover:-translate-y-1"
                   aria-label="Get started with engineering specialty services"

@@ -650,7 +650,7 @@ export default function RootLayout({ children }) {
           data-cbid="78869508-adbc-4a8b-af19-83bdf0866c05"
           data-blockingmode="auto"
           data-culture="EN"
-          strategy="beforeInteractive"
+          strategy="lazyOnload"
         />
         <ArrowNavigation />
         {!hideLayout && <Navbar />}

@@ -14,6 +14,15 @@ import api from '@/services/api';
 import { RouteGuard } from '@/components/RouteGuard';
 import { Drawer } from '@/components/ui/Drawer';
 import { Modal } from '@/components/ui/Modal';
+import {
+  PUBLIC_FORM_STEPS,
+  PublicJobStep1,
+  PublicJobStep2,
+  PublicJobStep3,
+  PublicJobStep4,
+} from '@/components/jobs/PublicJobPostingSections';
+import { JdPdfImport } from '@/components/jobs/JdPdfImport';
+import type { ParsedJobFields } from '@/utils/parseJobDescription';
 import type { Job, JobStatus, User, CloudinaryFile } from '@ats-saas/shared';
 import { formatDistanceToNow } from 'date-fns';
 import {
@@ -76,11 +85,11 @@ const formatSalaryLabel = (value?: number) => {
 
 const normalizeToStep = (value: number, step: number) => Math.round(value / step) * step;
 
-export default function JobsPage() {
+export default function JobsPage({ publicWebsiteMode = false }: { publicWebsiteMode?: boolean } = {}) {
   const { hasRole, user } = useAuth();
   const queryClient = useQueryClient();
   const isAdmin = hasRole?.('admin') ?? false;
-  const isRecruiter = hasRole?.('recruiter') ?? false;
+  const isRecruiter = (hasRole?.('recruiter') ?? false) && !publicWebsiteMode;
   const router = useRouter();
 
   const [search, setSearch] = useState('');
@@ -153,7 +162,17 @@ export default function JobsPage() {
     recruiterIds: [] as string[],
     benefits: [] as string[],
     openings: 1,
-    personalQuestions: [] as { question: string; required: boolean }[]
+    personalQuestions: [] as { question: string; required: boolean }[],
+    // Public website JD fields (mapped to customFields on save)
+    visa: '',
+    reportsTo: '',
+    interviewProcess: '',
+    whatYoullDo: '',
+    mustHaveText: '',
+    niceToHaveText: '',
+    notAFitText: '',
+    experience: '',
+    roleType: '',
   });
 
   const { data, isLoading } = useQuery({
@@ -242,6 +261,29 @@ export default function JobsPage() {
     }
   };
 
+  const buildSubmitBody = useCallback(() => {
+    const { visa, reportsTo, interviewProcess, whatYoullDo, mustHaveText, niceToHaveText, notAFitText, experience, ...rest } = form;
+    if (!publicWebsiteMode) return rest;
+    const customFields = [
+      { name: "What You'll Do", value: whatYoullDo.trim() },
+      { name: 'Visa', value: visa.trim() },
+      { name: 'Reports To', value: reportsTo.trim() },
+      { name: 'Interview Process', value: interviewProcess.trim() },
+      { name: 'Not a Fit', value: notAFitText.trim() },
+    ].filter((f) => f.value);
+    return {
+      ...rest,
+      requirements: mustHaveText
+        ? mustHaveText.split('\n').map((s) => s.trim()).filter(Boolean)
+        : rest.requirements,
+      benefits: niceToHaveText
+        ? niceToHaveText.split('\n').map((s) => s.trim()).filter(Boolean)
+        : rest.benefits,
+      customFields,
+      idealCandidate: { experience: experience.trim() },
+    };
+  }, [form, publicWebsiteMode]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (currentStep < 4) {
@@ -252,14 +294,17 @@ export default function JobsPage() {
       toast.error('Company and Title are required');
       return;
     }
+    const body = buildSubmitBody();
     if (editingJob) {
-      updateMutation.mutate({ id: editingJob.id, body: form });
+      updateMutation.mutate({ id: editingJob.id, body });
     } else {
-      createMutation.mutate(form);
+      createMutation.mutate(body);
     }
   };
 
   useEffect(() => {
+    const cf = (editingJob as any)?.customFields as { name: string; value: string }[] | undefined;
+    const getCf = (name: string) => cf?.find((f) => f.name.toLowerCase() === name.toLowerCase())?.value ?? '';
     if (editingJob) {
       setForm({
         title: editingJob.title || '',
@@ -276,7 +321,16 @@ export default function JobsPage() {
         recruiterIds: editingJob.recruiterIds || [],
         benefits: (editingJob as any).benefits || [],
         openings: editingJob.stats?.openings || 1,
-        personalQuestions: (editingJob as any).personalQuestions || []
+        personalQuestions: (editingJob as any).personalQuestions || [],
+        visa: getCf('Visa'),
+        reportsTo: getCf('Reports To'),
+        interviewProcess: getCf('Interview Process'),
+        whatYoullDo: getCf("What You'll Do"),
+        mustHaveText: (editingJob.requirements || []).join('\n'),
+        niceToHaveText: ((editingJob as any).benefits || []).join('\n'),
+        notAFitText: getCf('Not a Fit'),
+        experience: (editingJob as any).idealCandidate?.experience || '',
+        roleType: editingJob.roleType || '',
       });
     } else {
       setForm({
@@ -294,7 +348,16 @@ export default function JobsPage() {
         recruiterIds: [],
         benefits: [],
         openings: 1,
-        personalQuestions: []
+        personalQuestions: [],
+        visa: '',
+        reportsTo: '',
+        interviewProcess: '',
+        whatYoullDo: '',
+        mustHaveText: '',
+        niceToHaveText: '',
+        notAFitText: '',
+        experience: '',
+        roleType: '',
       });
     }
     setCurrentStep(1);
@@ -415,6 +478,17 @@ export default function JobsPage() {
     setForm(f => ({ ...f, benefits: f.benefits.filter(b => b !== benefit) }));
   };
 
+  const addSkill = (skill: string) => {
+    const trimmed = skill.trim();
+    if (trimmed && !form.skills.includes(trimmed)) {
+      setForm(f => ({ ...f, skills: [...f.skills, trimmed] }));
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    setForm(f => ({ ...f, skills: f.skills.filter(s => s !== skill) }));
+  };
+
   const addQuestion = () => {
     setForm(f => ({ ...f, personalQuestions: [...f.personalQuestions, { question: '', required: false }] }));
   };
@@ -429,16 +503,97 @@ export default function JobsPage() {
     setForm(f => ({ ...f, personalQuestions: f.personalQuestions.filter((_, i) => i !== idx) }));
   };
 
+  const toggleQuestionRequired = (idx: number) => {
+    const qs = [...form.personalQuestions];
+    qs[idx] = { ...qs[idx], required: !qs[idx].required };
+    setForm(f => ({ ...f, personalQuestions: qs }));
+  };
+
+  const applyParsedJd = useCallback((parsed: ParsedJobFields) => {
+    setForm((f) => ({
+      ...f,
+      title: parsed.title || f.title,
+      companyName: parsed.companyName || f.companyName,
+      location: parsed.location || f.location,
+      salary: parsed.salary || f.salary,
+      description: parsed.description || f.description,
+      workplaceType: parsed.workplaceType || f.workplaceType,
+      roleType: parsed.roleType || f.roleType,
+      experience: parsed.experience || f.experience,
+      visa: parsed.visa || f.visa,
+      reportsTo: parsed.reportsTo || f.reportsTo,
+      interviewProcess: parsed.interviewProcess || f.interviewProcess,
+      whatYoullDo: parsed.whatYoullDo || f.whatYoullDo,
+      mustHaveText: parsed.mustHaveText || f.mustHaveText,
+      niceToHaveText: parsed.niceToHaveText || f.niceToHaveText,
+      notAFitText: parsed.notAFitText || f.notAFitText,
+      skills: parsed.skills.length
+        ? [...new Set([...f.skills, ...parsed.skills])]
+        : f.skills,
+      requirements: parsed.mustHaveText
+        ? parsed.mustHaveText.split('\n').map((s) => s.trim()).filter(Boolean)
+        : f.requirements,
+      benefits: parsed.niceToHaveText
+        ? parsed.niceToHaveText.split('\n').map((s) => s.trim()).filter(Boolean)
+        : f.benefits,
+    }));
+  }, []);
+
+  const publicFormProps = {
+    form,
+    setForm,
+    uploadingLogo,
+    onLogoUpload: handleLogoUpload,
+    addSkill,
+    removeSkill,
+    addQuestion,
+    updateQuestion,
+    removeQuestion,
+    toggleQuestionRequired,
+    onJdImport: applyParsedJd,
+  };
+
   return (
-    <RouteGuard allowedRoles={['admin', 'recruiter']}>
+    <RouteGuard allowedRoles={publicWebsiteMode ? ['admin'] : ['admin', 'recruiter']}>
       <div className="mx-auto w-full min-w-0 max-w-[1200px] px-3 pb-20 sm:px-6">
+
+        {publicWebsiteMode && (
+          <div className="mt-4 sm:mt-6 mb-2 rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-3 sm:px-5 sm:py-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-700">
+                  <Globe className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-bold text-emerald-900">Public Website</p>
+                  <p className="text-xs text-emerald-800/80 sm:text-sm">
+                    Jobs posted here with status <strong>Open</strong> appear on{' '}
+                    <span className="font-semibold">quoreit.com/open-jobs</span>.
+                    <strong className="block mt-1">Company name & logo are internal only — never shown on the public site.</strong>
+                  </p>
+                </div>
+              </div>
+              <a
+                href={process.env.NEXT_PUBLIC_PUBLIC_SITE_URL
+                  ? `${process.env.NEXT_PUBLIC_PUBLIC_SITE_URL.replace(/\/$/, '')}/open-jobs`
+                  : 'http://localhost:3002/open-jobs'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 sm:text-sm"
+              >
+                View live page
+                <ChevronRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* Page Header */}
         <div className="mb-6 flex min-w-0 flex-col justify-between gap-5 pt-4 sm:mb-8 sm:flex-row sm:items-start sm:gap-6 sm:pt-6">
           <div className="relative min-w-0 flex-1">
             <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:pr-4">
               <h1 className="min-w-0 text-2xl font-semibold tracking-tight text-gray-900 sm:text-3xl md:text-4xl">
-                Browse for roles
+                {publicWebsiteMode ? 'Public Jobs' : 'Browse for roles'}
               </h1>
 
               <div className="flex shrink-0 items-center gap-4 sm:mt-0">
@@ -446,15 +601,22 @@ export default function JobsPage() {
                   <button
                     type="button"
                     onClick={() => { setEditingJob(null); setIsDrawerOpen(true); }}
-                    className="group flex w-full touch-manipulation items-center justify-center gap-2.5 rounded-full bg-blue-600 px-6 py-3 text-white shadow-xl shadow-blue-500/25 transition-all hover:bg-blue-700 hover:shadow-blue-500/35 active:scale-[0.98] sm:w-fit sm:px-7"
+                    className={`group flex w-full touch-manipulation items-center justify-center gap-2.5 rounded-full px-6 py-3 text-white shadow-xl transition-all active:scale-[0.98] sm:w-fit sm:px-7 ${
+                      publicWebsiteMode
+                        ? 'bg-emerald-600 shadow-emerald-500/25 hover:bg-emerald-700 hover:shadow-emerald-500/35'
+                        : 'bg-blue-600 shadow-blue-500/25 hover:bg-blue-700 hover:shadow-blue-500/35'
+                    }`}
                   >
-                    <Plus className="h-5 w-5 shrink-0 text-blue-100 transition-transform duration-300 group-hover:rotate-90" />
-                    <span className="text-[14px] font-black tracking-tight">Post Role</span>
+                    <Plus className={`h-5 w-5 shrink-0 transition-transform duration-300 group-hover:rotate-90 ${publicWebsiteMode ? 'text-emerald-100' : 'text-blue-100'}`} />
+                    <span className="text-[14px] font-black tracking-tight">
+                      {publicWebsiteMode ? 'Post Public Job' : 'Post Role'}
+                    </span>
                   </button>
                 )}
               </div>
             </div>
 
+            {!publicWebsiteMode && (
             <div className="mt-6 flex min-w-0 max-w-full touch-pan-x snap-x snap-mandatory items-center gap-4 overflow-x-auto pb-2 italic [-webkit-overflow-scrolling:touch] sm:mt-8 sm:gap-8 md:gap-10 sm:snap-none">
               {[
                 { id: 'qualified', label: 'Qualified roles', icon: CheckCircle2, meta: 'Beta' },
@@ -486,6 +648,7 @@ export default function JobsPage() {
                 </button>
               ))}
             </div>
+            )}
           </div>
         </div>
 
@@ -1003,150 +1166,153 @@ export default function JobsPage() {
         <Drawer
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
-          title={editingJob ? 'Refine Strategy' : 'Post New Opening'}
+          title={publicWebsiteMode
+            ? (editingJob ? 'Edit public job' : 'Post public job')
+            : (editingJob ? 'Refine Strategy' : 'Post New Opening')}
           fromRight={true}
-          className="w-full sm:max-w-xl lg:max-w-2xl"
+          className={publicWebsiteMode ? 'w-full sm:max-w-[480px]' : 'w-full sm:max-w-[420px]'}
         >
-          <div className="h-full flex flex-col no-scrollbar px-1">
-            {/* Premium Phase Progress */}
-            <div className="flex items-center gap-2 mb-10 sticky top-0 bg-white/90 backdrop-blur-sm z-30 py-4 border-b border-gray-50">
-              {[1, 2, 3, 4].map(s => (
-                <div key={s} className="flex-1 flex flex-col gap-2">
-                  <div className={`h-1.5 rounded-full transition-all duration-700 ${currentStep >= s ? 'bg-blue-600 shadow-sm shadow-blue-500/20' : 'bg-gray-100'}`} />
-                  <span className={`text-[8px] font-black uppercase tracking-[0.2em] transition-colors duration-500 ${currentStep === s ? 'text-blue-600' : 'text-gray-300'}`}>0{s}</span>
+          {publicWebsiteMode ? (
+          <div className="flex h-full flex-col -mx-1">
+            {/* Step progress */}
+            <div className="mb-6 border-b border-gray-100 pb-5">
+              <div className="flex items-center gap-1">
+                {PUBLIC_FORM_STEPS.map((step, idx) => {
+                  const StepIcon = step.icon;
+                  const active = currentStep === step.id;
+                  const done = currentStep > step.id;
+                  return (
+                    <div key={step.id} className="flex flex-1 items-center gap-1">
+                      <div className="flex flex-1 flex-col items-center gap-1.5">
+                        <div
+                          className={`flex h-9 w-9 items-center justify-center rounded-full transition-all ${
+                            active
+                              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30'
+                              : done
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-gray-100 text-gray-400'
+                          }`}
+                        >
+                          {done ? <Check className="h-4 w-4" /> : <StepIcon className="h-4 w-4" />}
+                        </div>
+                        <span className={`hidden text-center text-[10px] font-semibold sm:block ${active ? 'text-emerald-700' : 'text-gray-400'}`}>
+                          {step.label}
+                        </span>
+                      </div>
+                      {idx < PUBLIC_FORM_STEPS.length - 1 && (
+                        <div className={`mb-5 h-0.5 flex-1 rounded-full ${done ? 'bg-emerald-400' : 'bg-gray-200'}`} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-3 text-center text-xs text-gray-500 sm:hidden">
+                Step {currentStep} of 4 — {PUBLIC_FORM_STEPS[currentStep - 1]?.label}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+              <div className="flex-1 pb-4">
+                {currentStep === 1 && <PublicJobStep1 {...publicFormProps} />}
+                {currentStep === 2 && <PublicJobStep2 {...publicFormProps} />}
+                {currentStep === 3 && <PublicJobStep3 {...publicFormProps} />}
+                {currentStep === 4 && <PublicJobStep4 {...publicFormProps} />}
+              </div>
+
+              <div className="sticky bottom-0 flex gap-3 border-t border-gray-100 bg-white/95 py-4 backdrop-blur-sm">
+                {currentStep > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep((s) => s - 1)}
+                    className="flex-1 rounded-xl border border-gray-200 py-3.5 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                  >
+                    Back
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={createMutation.isPending || updateMutation.isPending}
+                  className="flex-[2] rounded-xl bg-emerald-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {createMutation.isPending || updateMutation.isPending
+                    ? 'Saving…'
+                    : currentStep < 4
+                      ? 'Continue'
+                      : editingJob
+                        ? 'Update & publish'
+                        : 'Publish to open-jobs'}
+                </button>
+              </div>
+            </form>
+          </div>
+          ) : (
+          <div className="h-full flex flex-col no-scrollbar">
+            <div className="mb-4 flex items-center gap-1.5 border-b border-gray-100 pb-3">
+              {[1, 2, 3, 4].map((s) => (
+                <div key={s} className="flex flex-1 flex-col gap-1">
+                  <div className={`h-1 rounded-full ${currentStep >= s ? 'bg-blue-600' : 'bg-gray-100'}`} />
+                  <span className={`text-[9px] font-semibold uppercase ${currentStep === s ? 'text-blue-600' : 'text-gray-300'}`}>
+                    {s}
+                  </span>
                 </div>
               ))}
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 flex flex-col pb-6 px-1">
-              <div className="flex-1 space-y-10">
+            <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
+              <div className="flex-1 space-y-4 pb-2">
 
-                {/* Step 1: Branding & Identity */}
                 {currentStep === 1 && (
-                  <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                    {/* Logo Upload Section */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4 bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 group hover:border-blue-100 hover:bg-white transition-all duration-300">
-                        <div className="relative w-24 h-24 bg-white shadow-2xl shadow-gray-200/50 rounded-[2rem] flex items-center justify-center overflow-hidden border border-gray-100">
-                          {form.companyLogo ? (
-                            <>
-                              <img src={form.companyLogo} className="w-full h-full object-contain p-4" />
-                              <button
-                                type="button"
-                                onClick={() => setForm(f => ({ ...f, companyLogo: '' }))}
-                                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white backdrop-blur-[2px]"
-                              >
-                                <X className="w-6 h-6 stroke-[3]" />
-                              </button>
-                            </>
-                          ) : (
-                            <div className="flex flex-col items-center gap-1.5">
-                              {uploadingLogo ? (
-                                <div className="w-7 h-7 border-[3px] border-blue-600 border-t-transparent animate-spin rounded-full" />
-                              ) : (
-                                <Camera className="w-7 h-7 text-gray-300 group-hover:text-blue-500 transition-colors" />
-                              )}
-                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">ADD LOGO</span>
-                            </div>
-                          )}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="absolute inset-0 opacity-0 cursor-pointer z-20"
-                            onChange={handleLogoUpload}
-                            disabled={uploadingLogo}
-                          />
-                        </div>
-                        <div className="flex-1 space-y-1.5">
-                          <p className="text-[13px] font-black text-gray-900 tracking-tight flex items-center gap-2 uppercase">Brand Identity <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" /></p>
-                          <p className="text-xs text-gray-400 font-bold leading-relaxed pr-4">Upload a company logo to make your role stand out to top-tier talent.</p>
-                        </div>
+                  <div className="space-y-3 animate-in slide-in-from-right-3 duration-300">
+                    <JdPdfImport onApply={applyParsedJd} accent="blue" />
+
+                    <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-3">
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-dashed border-gray-200 bg-white">
+                        {form.companyLogo ? (
+                          <img src={form.companyLogo} alt="" className="h-full w-full object-contain p-2" />
+                        ) : uploadingLogo ? (
+                          <div className="flex h-full items-center justify-center">
+                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                          </div>
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-gray-300">
+                            <Camera className="h-5 w-5" />
+                          </div>
+                        )}
+                        <input type="file" accept="image/*" className="absolute inset-0 cursor-pointer opacity-0" onChange={handleLogoUpload} disabled={uploadingLogo} />
+                      </div>
+                      <p className="text-[11px] leading-snug text-gray-500">Optional company logo for internal CRM</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Title *</label>
+                        <input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/15" placeholder="Lead Developer" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Company *</label>
+                        <input required value={form.companyName} onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))} className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/15" placeholder="Partner name" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Location</label>
+                        <input value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/15" placeholder="Remote / NYC" list="job-locations-list" />
+                        <datalist id="job-locations-list">{uniqueLocations.map((loc) => <option key={loc} value={loc} />)}</datalist>
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Salary</label>
+                        <input value={form.salary} onChange={(e) => setForm((f) => ({ ...f, salary: e.target.value }))} className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/15" placeholder="$120k – $160k" />
                       </div>
                     </div>
 
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-1 flex items-center gap-2"><Briefcase className="w-3 h-3" /> Position Title</label>
-                          <input
-                            required
-                            value={form.title}
-                            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                            className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl text-[14px] font-bold focus:bg-white focus:border-blue-500/30 outline-none transition-all shadow-sm focus:shadow-md"
-                            placeholder="e.g. Lead Developer"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-1 flex items-center gap-2"><Building2 className="w-3 h-3" /> Organization</label>
-                          <input
-                            required
-                            value={form.companyName}
-                            onChange={e => setForm(f => ({ ...f, companyName: e.target.value }))}
-                            className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl text-[14px] font-bold focus:bg-white focus:border-blue-500/30 outline-none transition-all shadow-sm focus:shadow-md"
-                            placeholder="Partner Name"
-                          />
-                        </div>
+                    <div className="grid grid-cols-2 gap-2.5 items-end">
+                      <div>
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Openings</label>
+                        <input type="number" min={1} required value={form.openings} onChange={(e) => setForm((f) => ({ ...f, openings: parseInt(e.target.value, 10) || 1 }))} className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/15" />
                       </div>
-                    </div>
-
-                    <div className="space-y-4 pt-4 border-t border-gray-50">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-1 flex items-center gap-2"><MapPin className="w-3 h-3" /> Location</label>
-                          <input
-                            value={form.location}
-                            onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
-                            className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl text-[14px] font-bold focus:bg-white focus:border-blue-500/30 outline-none transition-all shadow-sm focus:shadow-md"
-                            placeholder="e.g. Remote / London"
-                            list="job-locations-list"
-                          />
-                          <datalist id="job-locations-list">
-                            {uniqueLocations.map(loc => (
-                              <option key={loc} value={loc} />
-                            ))}
-                          </datalist>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-1 flex items-center gap-2"><DollarSign className="w-3 h-3" /> Salary Range</label>
-                          <input
-                            value={form.salary}
-                            onChange={e => setForm(f => ({ ...f, salary: e.target.value }))}
-                            className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl text-[14px] font-bold focus:bg-white focus:border-blue-500/30 outline-none transition-all shadow-sm focus:shadow-md"
-                            placeholder="e.g. $120k - $160k"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-1 flex items-center gap-2"><Users className="w-3 h-3" /> Total Strategic Openings</label>
-                        <div className="flex items-center gap-4 bg-gray-50/50 border border-gray-100 rounded-3xl p-3 pr-6 focus-within:bg-white focus-within:border-blue-500/30 transition-all shadow-sm focus-within:shadow-md">
-                          <div className="flex-1 flex items-center">
-                            <input
-                              type="number"
-                              min={1}
-                              required
-                              value={form.openings}
-                              onChange={e => setForm(f => ({ ...f, openings: parseInt(e.target.value, 10) || 1 }))}
-                              className="w-full px-3 bg-transparent border-none text-[16px] font-black text-gray-900 outline-none tabular-nums"
-                              placeholder="1"
-                            />
-                          </div>
-                          <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100/50">
-                            <span className="uppercase tracking-widest">Live Slots</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] ml-1 flex items-center gap-2"><Globe className="w-3 h-3" /> Workplace Protocol</label>
-                        <div className="flex p-1 bg-gray-50/50 border border-gray-100 rounded-[1.5rem] gap-1">
-                          {['On-site', 'Remote', 'Hybrid'].map(type => (
-                            <button
-                              key={type}
-                              type="button"
-                              onClick={() => setForm(f => ({ ...f, workplaceType: type }))}
-                              className={`flex-1 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${form.workplaceType === type ? 'bg-white text-blue-600 shadow-xl shadow-gray-200/50 border border-gray-100 scale-[1.02]' : 'bg-transparent text-gray-400 hover:text-gray-600'}`}
-                            >
+                      <div>
+                        <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-gray-500">Workplace</label>
+                        <div className="flex h-10 rounded-lg border border-gray-200 bg-white p-0.5">
+                          {['On-site', 'Remote', 'Hybrid'].map((type) => (
+                            <button key={type} type="button" onClick={() => setForm((f) => ({ ...f, workplaceType: type }))} className={`flex-1 rounded-md text-[10px] font-semibold ${form.workplaceType === type ? 'bg-blue-600 text-white' : 'text-gray-500'}`}>
                               {type}
                             </button>
                           ))}
@@ -1230,6 +1396,46 @@ export default function JobsPage() {
                         />
                       </div>
                     </div>
+
+                    {publicWebsiteMode && (
+                      <div className="space-y-6 pt-6 border-t border-emerald-100">
+                        <p className="text-[10px] font-black text-emerald-700 uppercase tracking-[0.2em]">Public JD format (shown on open-jobs)</p>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Experience</label>
+                            <input value={form.experience} onChange={e => setForm(f => ({ ...f, experience: e.target.value }))} className="w-full mt-1 px-4 py-3 border rounded-xl text-sm" placeholder="e.g. 3+ years B2B" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Visa</label>
+                            <input value={form.visa} onChange={e => setForm(f => ({ ...f, visa: e.target.value }))} className="w-full mt-1 px-4 py-3 border rounded-xl text-sm" placeholder="e.g. Not available" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Reports to</label>
+                            <input value={form.reportsTo} onChange={e => setForm(f => ({ ...f, reportsTo: e.target.value }))} className="w-full mt-1 px-4 py-3 border rounded-xl text-sm" placeholder="e.g. Founder" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Interview process</label>
+                            <input value={form.interviewProcess} onChange={e => setForm(f => ({ ...f, interviewProcess: e.target.value }))} className="w-full mt-1 px-4 py-3 border rounded-xl text-sm" placeholder="e.g. 3-step process" />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">What you&apos;ll do (one block per paragraph, title on first line)</label>
+                          <textarea rows={6} value={form.whatYoullDo} onChange={e => setForm(f => ({ ...f, whatYoullDo: e.target.value }))} className="w-full mt-1 px-4 py-3 border rounded-xl text-sm" placeholder="Pipeline Generation&#10;Build and execute lead gen..." />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Must have (one per line)</label>
+                          <textarea rows={5} value={form.mustHaveText} onChange={e => setForm(f => ({ ...f, mustHaveText: e.target.value }))} className="w-full mt-1 px-4 py-3 border rounded-xl text-sm" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nice to have (one per line)</label>
+                          <textarea rows={3} value={form.niceToHaveText} onChange={e => setForm(f => ({ ...f, niceToHaveText: e.target.value }))} className="w-full mt-1 px-4 py-3 border rounded-xl text-sm" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Not a fit if (one per line)</label>
+                          <textarea rows={3} value={form.notAFitText} onChange={e => setForm(f => ({ ...f, notAFitText: e.target.value }))} className="w-full mt-1 px-4 py-3 border rounded-xl text-sm" />
+                        </div>
+                      </div>
+                    )}
 
                     <div className="space-y-6 pt-8 border-t border-gray-50">
                       <div className="flex items-center justify-between px-1">
@@ -1321,25 +1527,26 @@ export default function JobsPage() {
 
               </div>
 
-              <div className="pt-8 flex gap-4 mt-auto sticky bottom-0 bg-white/80 backdrop-blur-md pb-4">
+              <div className="sticky bottom-0 mt-auto flex gap-2 border-t border-gray-100 bg-white/95 py-3">
                 {currentStep > 1 && (
                   <button
                     type="button"
                     onClick={() => setCurrentStep(s => s - 1)}
-                    className="flex-1 py-4 bg-gray-50 text-gray-500 text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-100"
+                    className="flex-1 h-10 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50"
                   >
-                    BACK
+                    Back
                   </button>
                 )}
                 <button
                   type="submit"
-                  className="flex-[2] py-4 bg-blue-600 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-blue-500/25 hover:bg-blue-700 hover:shadow-blue-500/40 active:scale-[0.98] transition-all"
+                  className="flex-[2] h-10 rounded-lg bg-blue-600 text-xs font-semibold text-white hover:bg-blue-700"
                 >
-                  {currentStep < 4 ? 'CONTINUE PHASE' : editingJob ? 'UPDATE MANDATE' : 'PUBLISH MANDATE'}
+                  {currentStep < 4 ? 'Continue' : editingJob ? 'Update job' : 'Publish job'}
                 </button>
               </div>
             </form>
           </div>
+          )}
         </Drawer>
 
         {/* Simplified Delete Confirm */}
