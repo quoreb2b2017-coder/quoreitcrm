@@ -26,7 +26,7 @@ cd backend && npm install
 cd ../shared && npm install
 
 # Frontend
-cd ../frontend && npm install
+cd ../frontend/crm-frontend && npm install
 ```
 
 ### 2. Configure environment
@@ -49,8 +49,11 @@ NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
 # Terminal 1 — Backend
 cd backend && npm run dev
 
-# Terminal 2 — Frontend
-cd frontend && npm run dev
+# Terminal 2 — CRM Frontend
+cd frontend/crm-frontend && npm run dev
+
+# Terminal 3 — Public Website (optional)
+cd frontend/public-website && npm run dev
 ```
 
 Visit: http://localhost:3000
@@ -72,16 +75,14 @@ Visit: http://localhost:3000
 
 ```
 quoreit-crm/
-├── frontend/          # Next.js app
-│   ├── app/          # App router pages
-│   ├── components/   # Reusable UI components
-│   ├── services/     # API client
-│   └── ...
-├── backend/           # Express API
+├── frontend/
+│   ├── crm-frontend/     # CRM / ATS Next.js app
+│   └── public-website/   # QuoreIT public marketing site
+├── backend/              # Express API
 │   └── src/
 │       ├── controllers/
 │       ├── models/
 │       ├── routes/
 │       └── ...
-└── shared/            # Shared TypeScript types
+└── shared/               # Shared TypeScript types
 ```

@@ -1,0 +1,6 @@
+{
+  "installCommand": "npm install",
+  "buildCommand": "cd ../../shared && npm install && cd ../crm-frontend && npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs"
+}
